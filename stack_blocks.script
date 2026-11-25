@@ -1,8 +1,10 @@
 def stack_blocks():
-  # --- Parametry pracoviště (MUSÍ se nastavit / doteachovat) ---
-  HOME = p[0, 0, 0, 0, 0, 0]    # nad zdrojovým sloupcem, nástroj svisle dolů (orientace 0°)
-  BUILD = p[0, 0, 0, 0, 0, 0]   # nad místem nového sloupce, stejná orientace jako HOME
-  GROUND_Z = 0.0                # Z [m] TCP při dotyku země (definovaný bod)
+  # --- Body z instalace (Installation → Features → Point, naučit tlačítkem Set point) ---
+  # HOME   nad zdrojovým sloupcem, nástroj svisle dolů (orientace 0°)
+  # BUILD  nad místem nového sloupce, stejná orientace jako HOME
+  # GROUND TCP při dotyku země
+  GROUND_Z = GROUND[2]          # Z [m] TCP při dotyku země
+  # --- Parametry (MUSÍ se nastavit) ---
   F_CONTACT = 10.0              # práh síly pro detekci nárazu [N]
   D_UP = 0.01                   # krok 4: odjezd nahoru po nárazu [m]
   D_PROBE = 0.03                # kroky 5, 6x2: zkušební jízda dolů [m], musí být > D_UP

@@ -39,16 +39,25 @@ Uchopení probíhá vždy v orientaci, ve které prsty nenarazily → prsty sví
 8. Dolů do nárazu (dosednutí na zem nebo předchozí vrstvu), otevřít, nahoru, přepnout cílovou vrstvu, opakovat.
 
 ## Parametry k nastavení
+### Body v instalaci (Installation → Features → Point)
+Body se naučí ručním najetím robota a tlačítkem **Set point**; uloží se do instalace a skript je čte jako proměnné typu pose. Při učení musí být aktivní stejný TCP jako při běhu (`TCP_1`).
+
+| Bod | Význam |
+|---|---|
+| `HOME` | pozice nad zdrojovým sloupcem, nástroj svisle dolů |
+| `BUILD` | pozice nad novým sloupcem, stejná orientace jako `HOME` (dostatečně vysoko i pro naklopenou kostku) |
+| `GROUND` | TCP při dotyku země; skript z něj použije jen Z (`GROUND_Z`) |
+
+Dostupnost bodů instalace jako proměnných ve skriptu je nutné ověřit na PolyScope 5.21.2 (není v context.md).
+
+### Parametry ve skriptu
 | Proměnná | Význam |
 |---|---|
-| `HOME` | pozice nad zdrojovým sloupcem |
-| `BUILD` | pozice nad novým sloupcem (dostatečně vysoko i pro naklopenou kostku) |
-| `GROUND_Z` | Z TCP při dotyku země |
 | `F_CONTACT` | práh síly nárazu [N] – ověřit na pěnových dílech |
 | `D_UP`, `D_PROBE` | odjezd nahoru / zkušební jízda dolů (`D_PROBE > D_UP`); rozdíl = hloubka uchopení |
 | `V_SEARCH`, `A_SEARCH` | rychlost a zrychlení hledání kontaktu |
 
-Výchozí hodnoty ve skriptu jsou pouze zástupné – před spuštěním je nutné je nastavit.
+Výchozí hodnoty parametrů ve skriptu jsou pouze zástupné – před spuštěním je nutné je nastavit.
 
 ## Známá omezení
 - Při naklopení stojící kostky do polohy „leží“ je kostka držena u konce → její střed je vůči `BUILD` posunut o (polovina délky − hloubka uchopení). Bez znalosti rozměrů to nelze kompenzovat.
