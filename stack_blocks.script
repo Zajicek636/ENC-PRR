@@ -3,6 +3,7 @@ def stack_blocks():
   # HOME   nad zdrojovým sloupcem, nástroj svisle dolů (orientace 0°)
   # BUILD  nad místem nového sloupce, stejná orientace jako HOME
   # GROUND TCP při dotyku země
+  # ROBOT_HOME home pozice robota (naučit v home pozici z Installation → General → Home)
   GROUND_Z = GROUND[2]          # Z [m] TCP při dotyku země
   # --- Parametry (MUSÍ se nastavit) ---
   F_CONTACT = 10.0              # práh síly pro detekci nárazu [N]
@@ -87,8 +88,9 @@ def stack_blocks():
     target_standing = not target_standing
   end
 
-  # 11. výchozí pozice a konec
+  # 11. výchozí pozice, home robota a konec
   return_home()
+  movej(ROBOT_HOME)
 end
 
 stack_blocks()

@@ -32,11 +32,12 @@ Uchopení probíhá vždy v orientaci, ve které prsty nenarazily → prsty sví
 1. Aktivace gripperu, cílová vrstva = „leží vodorovně“.
 2. `HOME` → zavřený gripper jede dolů do nárazu nebo na `GROUND_Z`.
 3. O `D_UP` nahoru, otevřít, `D_PROBE` dolů (0°); zpět, otočit o 90°, `D_PROBE` dolů.
-4. Vyhodnocení dle tabulky; při „zem“ → svisle nahoru, `HOME`, konec.
+4. Vyhodnocení dle tabulky; při „zem“ → krok 9.
 5. Uchopení, kontrola `rq_is_object_detected()` (jinak chyba a `halt`).
 6. Svisle nahoru, `HOME`.
 7. `BUILD` otočený o 90°; pokud se typ uchopené kostky (stojí/leží) liší od cílové vrstvy, naklopení o 90°.
 8. Dolů do nárazu (dosednutí na zem nebo předchozí vrstvu), otevřít, nahoru, přepnout cílovou vrstvu, opakovat.
+9. Po dosažení země: svisle nahoru, `HOME`, kloubový přejezd do home pozice robota (`ROBOT_HOME`), konec.
 
 ## Parametry k nastavení
 ### Body v instalaci (Installation → Features → Point)
@@ -47,6 +48,7 @@ Body se naučí ručním najetím robota a tlačítkem **Set point**; uloží se
 | `HOME` | pozice nad zdrojovým sloupcem, nástroj svisle dolů |
 | `BUILD` | pozice nad novým sloupcem, stejná orientace jako `HOME` (dostatečně vysoko i pro naklopenou kostku) |
 | `GROUND` | TCP při dotyku země; skript z něj použije jen Z (`GROUND_Z`) |
+| `ROBOT_HOME` | home pozice robota; robot nejdřív najet do Installation → General → Home, pak Set point |
 
 Dostupnost bodů instalace jako proměnných ve skriptu je nutné ověřit na PolyScope 5.21.2 (není v context.md).
 
@@ -60,6 +62,7 @@ Dostupnost bodů instalace jako proměnných ve skriptu je nutné ověřit na Po
 Výchozí hodnoty parametrů ve skriptu jsou pouze zástupné – před spuštěním je nutné je nastavit.
 
 ## Známá omezení
+- `ROBOT_HOME` je poloha TCP, ne úhly kloubů. `movej` na pózu volí řešení inverzní kinematiky nejbližší aktuální konfiguraci, takže výsledné úhly kloubů se mohou lišit od home pozice v instalaci (poloha TCP bude stejná).
 - Při naklopení stojící kostky do polohy „leží“ je kostka držena u konce → její střed je vůči `BUILD` posunut o (polovina délky − hloubka uchopení). Bez znalosti rozměrů to nelze kompenzovat.
 - Dosažitelnost naklopených poloh (dosah UR3e 500 mm) a kolize gripperu se sloupcem je nutné ověřit v simulátoru.
 - Funkce mimo seznam v context.md (`movel`, `movej`, `speedl`, `stopl`, `pose_add`, `pose_trans`, `get_actual_tcp_pose`, `zero_ftsensor`, `popup`, `halt`) jsou standardní URScript dle URScript manuálu pro e-Series.
