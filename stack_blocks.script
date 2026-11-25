@@ -1,0 +1,92 @@
+def stack_blocks():
+  # --- Parametry pracoviště (MUSÍ se nastavit / doteachovat) ---
+  HOME = p[0, 0, 0, 0, 0, 0]    # nad zdrojovým sloupcem, nástroj svisle dolů (orientace 0°)
+  BUILD = p[0, 0, 0, 0, 0, 0]   # nad místem nového sloupce, stejná orientace jako HOME
+  GROUND_Z = 0.0                # Z [m] TCP při dotyku země (definovaný bod)
+  F_CONTACT = 10.0              # práh síly pro detekci nárazu [N]
+  D_UP = 0.01                   # krok 4: odjezd nahoru po nárazu [m]
+  D_PROBE = 0.03                # kroky 5, 6x2: zkušební jízda dolů [m], musí být > D_UP
+  V_SEARCH = 0.02               # rychlost hledání kontaktu [m/s]
+  A_SEARCH = 0.5                # zrychlení hledání kontaktu [m/s^2]
+  ROT_90 = p[0, 0, 0, 0, 0, d2r(90)]   # otočení kolem osy nástroje Z
+  TILT_90 = p[0, 0, 0, d2r(90), 0, 0]  # naklopení kolem osy nástroje X (osa prstů)
+
+  # Jede dolů v ose Z báze, dokud nenarazí nebo neujede dist. Vrací True při nárazu.
+  def move_down_until_contact(dist):
+    zero_ftsensor()
+    z_end = get_actual_tcp_pose()[2] - dist
+    contact = False
+    while (not contact) and (get_actual_tcp_pose()[2] > z_end):
+      speedl([0, 0, -V_SEARCH, 0, 0, 0], A_SEARCH, 0.02)
+      contact = force() >= F_CONTACT
+    end
+    stopl(A_SEARCH)
+    return contact
+  end
+
+  # Najede do pose, otevře gripper a jede kousek dolů. Vrací True při nárazu.
+  def probe(pose):
+    movel(pose)
+    rq_open_and_wait()
+    return move_down_until_contact(D_PROBE)
+  end
+
+  # Svisle nahoru do výšky HOME a do výchozí pozice.
+  def return_home():
+    movel(pose_add(get_actual_tcp_pose(), p[0, 0, HOME[2] - get_actual_tcp_pose()[2], 0, 0, 0]))
+    movej(HOME)
+  end
+
+  rq_activate_and_wait()
+  target_standing = False   # nový sloupec začíná kostkou "leží vodorovně"
+
+  while True:
+    # 2.-3. nad sloupec, zavřeným gripperem dolů do nárazu nebo na zem
+    movej(HOME)
+    rq_close_and_wait()
+    move_down_until_contact(HOME[2] - GROUND_Z)
+    top = pose_add(HOME, p[0, 0, get_actual_tcp_pose()[2] + D_UP - HOME[2], 0, 0, 0])
+
+    # 4.-6. zkouška v 0° a v 90°
+    hit_0 = probe(top)
+    hit_90 = probe(pose_trans(top, ROT_90))
+
+    # 6b3b: zem -> 11.
+    if hit_0 and hit_90:
+      break
+    end
+
+    # 6a3a: stojí; 6b3a: leží vodorovně -> prsty už jsou kolem kostky (90°)
+    # 6a3b: leží svisle -> uchopit v 0°
+    picked_standing = (not hit_0) and (not hit_90)
+    if hit_90:
+      probe(top)
+    end
+
+    # 7. uchopení z delší strany
+    rq_close_and_wait()
+    if not rq_is_object_detected():
+      popup("Kostka nebyla uchopena.", "Chyba", error=True)
+      halt
+    end
+
+    # 8. svisle nahoru a do výchozí pozice
+    return_home()
+
+    # 9.-10. položení: ležící kostka v 90°, změna stojí <-> leží naklopením o 90°
+    place = pose_trans(BUILD, ROT_90)
+    if picked_standing != target_standing:
+      place = pose_trans(place, TILT_90)
+    end
+    movej(place)
+    move_down_until_contact(BUILD[2] - GROUND_Z)
+    rq_open_and_wait()
+    movel(place)
+    target_standing = not target_standing
+  end
+
+  # 11. výchozí pozice a konec
+  return_home()
+end
+
+stack_blocks()
